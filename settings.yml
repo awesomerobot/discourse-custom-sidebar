@@ -1,6 +1,6 @@
 setup:
   type: list
-  default: ''
+  default: 'Staff,post,3'
   description: |
     Each line should be in the format of "<code>category name</code>, <code>post</code>, <code>ID</code>". The post ID can be found by inspecting the HTML source of a post and searching for <code>data-post-id</code>
 
