@@ -1,4 +1,7 @@
 <script type="text/discourse-plugin" version="0.8">
+
+  // todo: refactor
+
   function defaultSettings() {
     return {
       sidebar: "right",
@@ -34,7 +37,7 @@
       const category = controller.get("category");
       const stickyOffset  = document.getElementsByClassName('d-header')[0].offsetHeight + 20;
       const sidebarWrapper = document.getElementById("fixed-wrapper");
-    
+
       function sidebarClasses(setup) {
         $(".topic-list")
         .addClass("with-sidebar")
@@ -44,38 +47,47 @@
 
       if (/^\/c\//.test(path) && setups[category.name]){ // If set, show category sidebar
         const setup = setups[category.name];
-        sidebarClasses(setup);
-
-        const nodes = [
-          h("div", {
-            innerHTML: this.getPost(setup["post"])
-          })
-        ];
-        return h("div.category-sidebar-contents " + ".category-sidebar-" + category.slug, nodes);
-        
-      } else if (settings.inherit_parent_sidebar && /^\/c\//.test(path) && setups[category.parentCategory.name] != undefined && setups[category.name] == undefined ) { // Subcategory pages if unset, take on parent
-        const setup = setups[category.parentCategory.name];
-        sidebarClasses(setup);
-        
-        const nodes = [
-          h("div", {
-            innerHTML: this.getPost(setup["post"])
-          })
-        ];
-        return h("div.category-sidebar-contents " + ".category-sidebar-", nodes);
-
-      } else if (/^\/$/.test(path) || /^\/latest/.test(path) || /^\/new/.test(path) || /^\/unread/.test(path) || /^\/top/.test(path))  { // If set, show sidebar for all categories 
-        const setup = setups["all"];
-        sidebarClasses(setup);
-
-        const nodes = [
-          h("div", {
-            innerHTML: this.getPost(setup["post"])
-          })
-        ];
-        return h("div.category-sidebar-contents " + ".category-sidebar-all", nodes);      
-     } else {
+        if (setup) {
+          sidebarClasses(setup);
+          const nodes = [
+            h("div", {
+              innerHTML: this.getPost(setup["post"])
+            })
+          ];
+          return h("div.category-sidebar-contents " + ".category-sidebar-" + category.slug, nodes);
+        }
+      }   else {
         $(".topic-list").removeClass("with-sidebar");
+      }
+
+      if (/^\/$/.test(path) || /^\/latest/.test(path) || /^\/new/.test(path) || /^\/unread/.test(path) || /^\/top/.test(path))  { // If set, show sidebar for all categories
+        const setup = setups["all"];
+        if (setup) {
+          sidebarClasses(setup);
+          const nodes = [
+            h("div", {
+              innerHTML: this.getPost(setup["post"])
+            })
+          ];
+          return h("div.category-sidebar-contents " + ".category-sidebar-all", nodes);
+        }
+      }
+
+      if (category) {
+        if (category.parentCategory) {
+          if (settings.inherit_parent_sidebar && /^\/c\//.test(path) && setups[category.parentCategory.name] != undefined && setups[category.name] == undefined ) { // Subcategory pages if unset, take on parent
+            const setup = setups[category.parentCategory.name];
+            if (setup) {
+              sidebarClasses(setup);
+              const nodes = [
+                h("div", {
+                  innerHTML: this.getPost(setup["post"])
+                })
+              ];
+              return h("div.category-sidebar-contents " + ".category-sidebar-", nodes);
+            }
+          }
+        }
       }
     },
 
@@ -92,6 +104,9 @@
   });
 </script>
 
-<script type='text/x-handlebars' data-template-name='/connectors/before-topic-list-body/category-sidebar'>
+<script
+  type="text/x-handlebars"
+  data-template-name="/connectors/before-topic-list-body/category-sidebar"
+>
   <div class="category-sidebar"> {{mount-widget widget="category-sidebar"}} </div>
 </script>
